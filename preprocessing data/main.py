@@ -1,9 +1,52 @@
 import os
 import cv2
+import tarfile
+import requests
 import numpy as np
 import matplotlib.pyplot as plt
 
-pathToDataset = 'images/Images'
+pathToDataset = 'Images'
+url = 'http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar'
+
+## Módulo para preparar o Dataset
+def prepareDataset(url): 
+    nome = url.split('/')
+    nome = nome[len(nome)-1]
+    #
+    response = requests.get(url, stream=True) # Faz a requisição
+    total_length = response.headers.get('content-length') # Pega o tamanho do arquivo
+    if response.status_code == requests.codes.OK: # Verifica se a requisição ocorreu bem
+        downData(response, nome, total_length) # Faz o download
+        try:
+            extractFile(nome) # Extrai o arquivo
+        except:
+            print('Falha na extração do arquivo. Tente fazer manualmente.')
+    else:
+        print('Não foi possível realizar o download.')
+        response.raise_for_status()
+    try:
+        os.remove(nome) # Remove o arquivo compactado
+    except:
+        pass
+
+## Módulo para baixar o Dataset
+def downData(response, nome, total_length):
+    progress = 0 # Registra a quantidade de informação baixada
+    with open(nome, 'wb') as arquivo:
+            for parte in response.iter_content(chunk_size=256): 
+                arquivo.write(parte)
+                progress = progress + len(parte)
+                porcent = (progress/int(total_length))*100
+                print(f'Estamos em {round(porcent,1)}% de {total_length[:3]} Mb',end='\r')
+    print("Download finalizado com sucesso.")
+
+
+## Módulo para realizar a extração do arquivo
+def extractFile(nome):
+    t = tarfile.open(nome)
+    print('Realizando extração, aguarde.')
+    t.extractall('../')
+    print('Arquivo extraido com sucesso.')
 
 ## Módulo para criar o target name
 def createTargetName(pathToDataset):
