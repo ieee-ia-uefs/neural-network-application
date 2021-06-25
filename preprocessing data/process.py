@@ -46,7 +46,7 @@ def createTargetName(pathToDataset):
     pastas.sort() # Para padronizar
     racas = []
     for i in range(len(pastas)):
-        nomeracas = pastas[i].split('-')
+        nomeracas = pastas[i].split('-', 1)
         racas.append(nomeracas[1])
     # Cria a pasta, se não houver
     try:
@@ -94,7 +94,7 @@ def targetTESTE(pathToDataset):
     # 
     for i in range(len(pastas)):
         arquivos = os.listdir(pathToDataset+'/'+pastas[i])
-        nomeracas = pastas[i].split('-')
+        nomeracas = pastas[i].split('-', 1)
         for i in range (0, len(arquivos)):
             racas.append(nomeracas[1])
     # Cria a pasta, se não houver
