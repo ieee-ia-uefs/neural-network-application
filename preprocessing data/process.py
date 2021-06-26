@@ -4,6 +4,8 @@ import tarfile
 import requests
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from google.colab.patches import cv2_imshow
 
 pathToDataset = 'Images'
 url = 'http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar'
@@ -44,7 +46,7 @@ def createTargetName(pathToDataset):
     pastas.sort() # Para padronizar
     racas = []
     for i in range(len(pastas)):
-        nomeracas = pastas[i].split('-')
+        nomeracas = pastas[i].split('-', 1)
         racas.append(nomeracas[1])
     # Cria a pasta, se não houver
     try:
@@ -92,7 +94,7 @@ def targetTESTE(pathToDataset):
     # 
     for i in range(len(pastas)):
         arquivos = os.listdir(pathToDataset+'/'+pastas[i])
-        nomeracas = pastas[i].split('-')
+        nomeracas = pastas[i].split('-', 1)
         for i in range (0, len(arquivos)):
             racas.append(nomeracas[1])
     # Cria a pasta, se não houver
@@ -137,3 +139,48 @@ def loadFeatures(pathToDataset):
             image = cv2.imread(pathToDataset+'/'+pastas[i]+'/'+arquivos[j]) # Transformando arquivo de foto em matriz numpy
             features.append(image)
     return np.array(features)
+
+
+def agruparRacas(nomes, targets, imagensRacas, pathToDataset):
+  """Agrupa as raças em um dicionário no qual o nome da raça é cada uma das chaves."""
+  racas = {}
+  
+  for i in range(len(imagensRacas)):
+    racaAtual = nomes[racasTarget[i]] # Nome da raça que está sendo agrupada
+    
+    if not racas.get(racaAtual, 0):
+      racas[racaAtual] = [] # Cria uma lista como valor caso não exista.
+    racas[racaAtual].append(imagensRacas[i]) # Adiciona a imagem à lista da chave.
+  return racas
+
+
+def separarTesteTreino(targets, dicioRacas):
+  """Separa os dados de testes e de treinos, com 33 % das imagens de cada raça."""
+  img_treino = []
+  trgt_treino = []
+  img_teste = []
+  trgt_teste = []
+  targetRaca = 0
+  
+  for raca in dicioRacas.values():
+    qntdImagens = len(raca)
+    targets = np.full( (qntdImagens, 1), targetRaca) # Array com os targets dessa raça.
+    
+    imagens_treino, imagens_teste, targets_treino, target_teste = train_test_split(raca, targets, test_size=0.33, random_state=42)
+    
+    img_treino += list(imagens_treino)
+    trgt_treino += list(targets_treino)
+    img_teste += list(imagens_teste)
+    trgt_teste += list(target_teste)
+    targetRaca += 1
+  
+  return img_treino, trgt_treino, img_teste, trgt_teste
+
+
+nomes = loadTargetNames(pathToDataset)
+racasTarget = loadTarget(pathToDataset)
+imagens = loadFeatures(pathToDataset)
+
+dicio = agruparRacas(nomes, racasTarget, imagens, pathToDataset)
+
+imgns_treino, targets_treino, imgns_teste, targets_teste = separarTesteTreino(racasTarget, dicio)
