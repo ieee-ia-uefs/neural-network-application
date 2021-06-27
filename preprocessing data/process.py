@@ -135,9 +135,10 @@ def loadFeatures(pathToDataset):
     features = []
     for i in range(len(pastas)): # Acessando as pasta
         arquivos = os.listdir(pathToDataset+'/'+pastas[i])
-        for j in range (0, len(arquivos)): # Acessando os arquivos
+        for j in range (148): # Acessando os arquivos até o 148°, pois a menor quantidade de fotos presentes em agluma raça é 148
             image = cv2.imread(pathToDataset+'/'+pastas[i]+'/'+arquivos[j]) # Transformando arquivo de foto em matriz numpy
-            features.append(image)
+            resized_image = cv2.resize(image, (240, 240))
+            features.append(resized_image)
     return np.array(features)
 
 
