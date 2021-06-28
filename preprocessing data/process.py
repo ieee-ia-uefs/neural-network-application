@@ -70,7 +70,7 @@ def createTarget(pathToDataset):
     #
     for i in range(len(pastas)):
         arquivos = os.listdir(pathToDataset+'/'+pastas[i])
-        for i in range (0, len(arquivos)):
+        for i in range (148):
             racas.append(alvo)
         alvo = alvo + 1
     # Cria a pasta, se não houver
